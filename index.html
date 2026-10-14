@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevOps Lab</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="background"></div>
+
+    <main class="page">
+      <header class="glass hero">
+        <p class="badge">Practice workspace</p>
+        <h1>DevOps Lab</h1>
+        <p class="lead">
+          A simple glass UI you can run locally, then package with Docker. No build step —
+          just static files.
+        </p>
+      </header>
+
+      <section class="glass card">
+        <h2>What you will practice</h2>
+        <ul class="topics">
+          <li>Docker — images, containers, ports</li>
+          <li>Compose — multi-container apps</li>
+          <li>CI/CD — build and push the image</li>
+        </ul>
+      </section>
+
+      <div class="grid">
+        <article class="glass card">
+          <h3>Containers</h3>
+          <p>Your next step: write a Dockerfile for this folder.</p>
+        </article>
+        <article class="glass card">
+          <h3>Run locally</h3>
+          <p class="code">python3 -m http.server 8080</p>
+          <p class="muted">Open <strong>http://localhost:8080</strong></p>
+        </article>
+        <article class="glass card">
+          <h3>After Docker</h3>
+          <p class="code">docker run -p 8080:80 devops-lab</p>
+          <p class="muted">Same page, inside a container.</p>
+        </article>
+      </div>
+
+      <footer class="glass card footer">
+        <span class="dot"></span> Ready for your Dockerfile
+      </footer>
+    </main>
+  </body>
+</html>
+
