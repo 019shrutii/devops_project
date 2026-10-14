@@ -118,6 +118,7 @@ pipeline {
         }
 
         
+
 stage('DEPLOY TO EKS') {
     steps {
         sh '''
@@ -125,28 +126,31 @@ stage('DEPLOY TO EKS') {
 
             echo "Applying Kubernetes manifests..."
 
-            # Update the image to this Jenkins build's version
             sed -i \
-              "s|image: shruti190/ui:latest|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" \
+              "s|image: shruti190/ui:latest|image: shruti190/ui:${BUILD_NUMBER}|" \
               Deployment.yml
 
-            # Apply Deployment and Service
             kubectl apply -f Deployment.yml
             kubectl apply -f Service.yml
 
-            # Wait for the application rollout
             kubectl rollout status \
-              deployment/devops-ui-deployment \
+              deployment/devops-ui \
               --timeout=180s
 
-            echo "Current pods:"
+            echo "Deployed image:"
+            kubectl get deployment devops-ui \
+              -o jsonpath='{.spec.template.spec.containers[*].image}'
+            echo
+
+            echo "Pods:"
             kubectl get pods -o wide
 
-            echo "Current services:"
+            echo "Services:"
             kubectl get services
         '''
     }
 }
+
 
 
     }
