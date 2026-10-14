@@ -1,42 +1,62 @@
+
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = 'shruti190/ui'
+    }
+
     stages {
-        stage('Git Clone') {
+        stage('GIT CHECKOUT') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    url: 'https://github.com/019shrutii/devops_project.git'
             }
         }
 
-        stage('Build') {
+        stage('BUILD DOCKER IMAGE') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+                sh '''
+                    docker build \
+                        -t "$IMAGE_NAME:$BUILD_NUMBER" \
+                        -t "$IMAGE_NAME:latest" .
+                '''
+            }
+        }
+
+        stage('PUSH IMAGE TO DOCKERHUB') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh '''
-                        docker build -t "$DOCKER_USER/devops-lab:$BUILD_NUMBER" .
-                        docker tag "$DOCKER_USER/devops-lab:$BUILD_NUMBER" "$DOCKER_USER/devops-lab:latest"
+                        set +x
+                        set -eu
+
+                        echo "$DOCKER_PASS" | docker login \
+                            --username "$DOCKER_USER" \
+                            --password-stdin
+
+                        trap 'docker logout >/dev/null 2>&1 || true' EXIT
+
+                        docker push "$IMAGE_NAME:$BUILD_NUMBER"
+                        docker push "$IMAGE_NAME:latest"
                     '''
                 }
             }
         }
+    }
 
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push "$DOCKER_USER/devops-lab:$BUILD_NUMBER"
-                        docker push "$DOCKER_USER/devops-lab:latest"
-                    '''
-                }
-            }
+    post {
+        success {
+            echo 'UI Docker image built and pushed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check Jenkins Console Output.'
         }
     }
 }
