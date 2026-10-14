@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-ui
+  labels:
+    app: devops-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-ui
+  template:
+    metadata:
+      labels:
+        app: devops-ui
+    spec:
+      containers:
+        - name: devops-ui
+          image: shruti190/ui:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
