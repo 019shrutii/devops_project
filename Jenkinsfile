@@ -117,35 +117,38 @@ pipeline {
             }
         }
 
-        stage('DEPLOY TO EKS') {
-            steps {
-                sh '''
-                    set -eu
+        
+stage('DEPLOY TO EKS') {
+    steps {
+        sh '''
+            set -eu
 
-                    echo "Applying Kubernetes manifests..."
+            echo "Applying Kubernetes manifests..."
 
-                    # Use this build's immutable image tag
-                    sed -i \
-                      "s|image: shruti190/ui:latest|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" \
-                      deployment.yml
+            # Update the image to this Jenkins build's version
+            sed -i \
+              "s|image: shruti190/ui:latest|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" \
+              Deployment.yml
 
-                    kubectl apply -f deployment.yml
-                    kubectl apply -f service.yml
+            # Apply Deployment and Service
+            kubectl apply -f Deployment.yml
+            kubectl apply -f Service.yml
 
-                    echo "Waiting for rollout..."
+            # Wait for the application rollout
+            kubectl rollout status \
+              deployment/devops-ui-deployment \
+              --timeout=180s
 
-                    kubectl rollout status \
-                      deployment/"$K8S_DEPLOYMENT" \
-                      --timeout=180s
+            echo "Current pods:"
+            kubectl get pods -o wide
 
-                    echo "Current pods:"
-                    kubectl get pods -o wide
+            echo "Current services:"
+            kubectl get services
+        '''
+    }
+}
 
-                    echo "Current service:"
-                    kubectl get service devops-ui-service
-                '''
-            }
-        }
+
     }
 
     post {
